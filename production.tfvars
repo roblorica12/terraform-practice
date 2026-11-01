@@ -1,1 +1,1 @@
-bucket_name = "rob-production-bucket-2026"
+environment = "production"
