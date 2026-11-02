@@ -8,7 +8,6 @@ terraform {
 
   backend "s3" {
     bucket = "rob-terraform-state-2026-new"
-    key    = "terraform.tfstate"
     region = "us-east-1"
   }
 }
@@ -18,6 +17,10 @@ provider "aws" {
 }
 
 variable "ssh_public_key" {
+  type = string
+}
+
+variable "environment" {
   type = string
 }
 
@@ -37,7 +40,7 @@ data "aws_ami" "al2023" {
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "web-server-sg"
+  name = "web-server-sg-${var.environment}"
   description = "Allow HTTP and SSH"
 
   ingress {
@@ -65,7 +68,7 @@ resource "aws_security_group" "web_sg" {
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "rob-web-server-key"
+  key_name = "rob-web-server-key-${var.environment}"
   public_key = var.ssh_public_key
 }
 
@@ -102,7 +105,7 @@ resource "aws_instance" "wordpress_server" {
               EOF
 
   tags = {
-    Name = "rob-wordpress-server"
+    Name = "rob-wordpress-${var.environment}"
   }
 }
 
