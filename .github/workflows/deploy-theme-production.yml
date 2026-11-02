@@ -1,0 +1,35 @@
+name: Deploy Theme to Production
+
+on:
+  push:
+    branches: [production]
+    paths:
+      - 'themes/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy theme to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "themes/rob-theme"
+          target: "/tmp"
+          strip_components: 1
+          overwrite: true
+
+      - name: Install theme
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo rm -rf /var/www/html/wp-content/themes/rob-theme
+            sudo cp -r /tmp/rob-theme /var/www/html/wp-content/themes/
+            sudo chown -R apache:apache /var/www/html/wp-content/themes/rob-theme
