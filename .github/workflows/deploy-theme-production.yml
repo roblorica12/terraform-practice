@@ -2,20 +2,22 @@ name: Deploy Theme to Production
 
 on:
   push:
-    branches: [production]
+    branches: [main]
     paths:
       - 'themes/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
       - name: Copy theme to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.STAGING_HOST }}
+          host: ${{ secrets.PRODUCTION_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "themes/rob-theme"
